@@ -1,9 +1,14 @@
 package org.elitefactory.paramz.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 
@@ -12,6 +17,7 @@ public class ParamzTest {
 	private static final String KEY_PASSWORD = "awesome.service.password";
 	private static final String KEY_LOGIN = "awesome.service.login";
 	private static final String KEY_URL = "awesome.service.url";
+
 	private static final String OVERRIDE_PROPERTIES_PATH = "test-override.properties";
 	private static final String BASE_PROPERTIES_PATH = "test-base.properties";
 	private static final String BAD_OVERRIDE_PROPERTIES_PATH = "not-existing.properties";
@@ -25,10 +31,9 @@ public class ParamzTest {
 
 		paramz.setConfigurationSources(configurationFilePaths);
 
-		Assert.assertEquals("http://google.com/API/zoupete",
-				paramz.getParam(KEY_URL));
-		Assert.assertEquals("juanita", paramz.getParam(KEY_LOGIN));
-		Assert.assertEquals("banana", paramz.getParam(KEY_PASSWORD));
+		assertEquals("http://google.com/API/zoupete", paramz.getParam(KEY_URL));
+		assertEquals("juanita", paramz.getParam(KEY_LOGIN));
+		assertEquals("banana", paramz.getParam(KEY_PASSWORD));
 	}
 
 	@Test
@@ -41,10 +46,9 @@ public class ParamzTest {
 
 		paramz.setConfigurationSources(configurationFilePaths);
 
-		Assert.assertEquals("http://google.com/API/zoupete",
-				paramz.getParam(KEY_URL));
-		Assert.assertEquals("steven", paramz.getParam(KEY_LOGIN));
-		Assert.assertEquals("banana", paramz.getParam(KEY_PASSWORD));
+		assertEquals("http://google.com/API/zoupete", paramz.getParam(KEY_URL));
+		assertEquals("steven", paramz.getParam(KEY_LOGIN));
+		assertEquals("banana", paramz.getParam(KEY_PASSWORD));
 	}
 
 	@Test
@@ -57,12 +61,37 @@ public class ParamzTest {
 
 		paramz.setConfigurationSources(configurationFilePaths);
 
-		Assert.assertEquals("http://google.com/API/zoupete",
-				paramz.getParam(KEY_URL));
-		Assert.assertEquals("juanita", paramz.getParam(KEY_LOGIN));
-		Assert.assertEquals("banana", paramz.getParam(KEY_PASSWORD));
+		assertEquals("http://google.com/API/zoupete", paramz.getParam(KEY_URL));
+		assertEquals("juanita", paramz.getParam(KEY_LOGIN));
+		assertEquals("banana", paramz.getParam(KEY_PASSWORD));
+	}
 
-		paramz.setParam("ddd", "value");
+	@Test
+	public void shouldTriggerListener() {
+		Paramz paramz = new Paramz();
+
+		List<String> configurationFilePaths = new ArrayList<String>();
+		configurationFilePaths.add(OVERRIDE_PROPERTIES_PATH);
+		configurationFilePaths.add(BASE_PROPERTIES_PATH);
+
+		paramz.setConfigurationSources(configurationFilePaths);
+
+		ParamerUpdateListener mockListenerForLogin = mock(ParamerUpdateListener.class);
+		ParamerUpdateListener mockListenerForUrl = mock(ParamerUpdateListener.class);
+
+		paramz.addListener(KEY_LOGIN, mockListenerForLogin);
+		paramz.addListener(KEY_URL, mockListenerForUrl);
+
+		paramz.setParam(KEY_LOGIN, "value1");
+		paramz.setParam(KEY_LOGIN, "value2");
+		paramz.setParam(KEY_PASSWORD, "value2");
+
+		verify(mockListenerForLogin, times(2)).onConfigChange();
+
+		reset(mockListenerForLogin);
+		paramz.setParam(KEY_PASSWORD, "value2");
+		verify(mockListenerForLogin, never()).onConfigChange();
+		verify(mockListenerForUrl, never()).onConfigChange();
 	}
 
 }

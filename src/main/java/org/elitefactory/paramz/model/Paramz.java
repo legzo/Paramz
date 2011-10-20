@@ -1,6 +1,10 @@
 package org.elitefactory.paramz.model;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.CombinedConfiguration;
@@ -16,6 +20,8 @@ public class Paramz implements ConfigurationListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(Paramz.class);
 
+	private Map<String, Set<ParamerUpdateListener>> listeners = new HashMap<String, Set<ParamerUpdateListener>>();
+
 	private CombinedConfiguration config = new CombinedConfiguration();
 
 	public Paramz() {
@@ -26,6 +32,22 @@ public class Paramz implements ConfigurationListener {
 
 	public String getParam(String key) {
 		return config.getString(key);
+	}
+
+	public void setParam(String key, String value) {
+		config.setProperty(key, value);
+	}
+
+	public void addListener(String keyToListenTo, ParamerUpdateListener listener) {
+		if (keyToListenTo != null) {
+			Set<ParamerUpdateListener> existingListenersForKey = listeners
+					.get(keyToListenTo);
+			if (existingListenersForKey == null) {
+				existingListenersForKey = new HashSet<ParamerUpdateListener>();
+				listeners.put(keyToListenTo, existingListenersForKey);
+			}
+			existingListenersForKey.add(listener);
+		}
 	}
 
 	public void setConfigurationSources(List<String> configurationFilePaths) {
@@ -45,18 +67,22 @@ public class Paramz implements ConfigurationListener {
 		}
 	}
 
-	public void setParam(String key, String value) {
-		config.setProperty(key, value);
-	}
-
 	public void configurationChanged(ConfigurationEvent event) {
-		if (event.getPropertyName() != null
+		String keyThatTriggeredEvent = event.getPropertyName();
+		if (keyThatTriggeredEvent != null
 				&& event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY
 				&& event.isBeforeUpdate()) {
 			logger.info("Configuration changed because of property {}",
-					event.getPropertyName());
+					keyThatTriggeredEvent);
+
+			Set<ParamerUpdateListener> listenersForThisKey = listeners
+					.get(keyThatTriggeredEvent);
+
+			if (listenersForThisKey != null) {
+				for (ParamerUpdateListener listenerForThisKey : listenersForThisKey) {
+					listenerForThisKey.onConfigChange();
+				}
+			}
 		}
-
 	}
-
 }
