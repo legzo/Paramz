@@ -6,7 +6,7 @@
   <artifactId>paramz</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-
+  <description>A quick configuration tool for apps</description>
   <name>paramz</name>
   <url>http://maven.apache.org</url>
 
