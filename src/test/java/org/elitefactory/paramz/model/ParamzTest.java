@@ -61,6 +61,8 @@ public class ParamzTest {
 				paramz.getParam(KEY_URL));
 		Assert.assertEquals("juanita", paramz.getParam(KEY_LOGIN));
 		Assert.assertEquals("banana", paramz.getParam(KEY_PASSWORD));
+
+		paramz.setParam("ddd", "value");
 	}
 
 }
