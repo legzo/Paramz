@@ -54,7 +54,7 @@ public class Paramz implements ConfigurationListener {
 		if (configurationFilePaths != null) {
 			for (String configurationFilePath : configurationFilePaths) {
 				try {
-					logger.debug("Adding new config file: {}",
+					logger.info("Adding new config file: {}",
 							configurationFilePath);
 					config.addConfiguration(new PropertiesConfiguration(
 							configurationFilePath));
@@ -72,7 +72,7 @@ public class Paramz implements ConfigurationListener {
 		if (keyThatTriggeredEvent != null
 				&& event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY
 				&& event.isBeforeUpdate()) {
-			logger.info("Configuration changed because of property {}",
+			logger.debug("Configuration changed because of update on property {}",
 					keyThatTriggeredEvent);
 
 			Set<ParamerUpdateListener> listenersForThisKey = listeners
@@ -80,6 +80,7 @@ public class Paramz implements ConfigurationListener {
 
 			if (listenersForThisKey != null) {
 				for (ParamerUpdateListener listenerForThisKey : listenersForThisKey) {
+					logger.debug("Triggering listener {}", listenerForThisKey.getClass().getSimpleName());
 					listenerForThisKey.onConfigChange();
 				}
 			}
