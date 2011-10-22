@@ -1,15 +1,16 @@
 package org.elitefactory.paramz.web;
 
+import javax.annotation.Resource;
+
 import org.apache.wicket.Application;
 import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import org.elitefactory.paramz.model.Paramz;
 
 public class ParamzApplication extends WebApplication {
 
-	@SpringBean
+	@Resource
 	private Paramz paramz;
 
 	@Override
@@ -28,7 +29,7 @@ public class ParamzApplication extends WebApplication {
 		return (ParamzApplication) Application.get();
 	}
 
-	public Paramz getParamz() {
-		return paramz;
+	public static Paramz getParamzService() {
+		return get().paramz;
 	}
 }

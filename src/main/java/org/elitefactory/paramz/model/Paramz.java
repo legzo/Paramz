@@ -108,7 +108,7 @@ public class Paramz implements ConfigurationListener {
 		if (keyThatTriggeredEvent != null
 				&& event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY
 				&& event.isBeforeUpdate()) {
-			logger.debug(
+			logger.trace(
 					"Configuration changed because of update on property {}",
 					keyThatTriggeredEvent);
 
