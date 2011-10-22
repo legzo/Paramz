@@ -12,6 +12,6 @@
     <appender-ref ref="STDOUT" />
   </root>
   
-  <logger name="org.elite" level="debug" />
+  <logger name="org.elitefactory" level="debug" />
   
 </configuration>

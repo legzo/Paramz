@@ -33,6 +33,7 @@ public class Paramz implements ConfigurationListener {
 	}
 
 	public Paramz(String... configurationSources) {
+		super();
 		for (String configurationSource : configurationSources) {
 			addConfigurationSource(configurationSource);
 		}
@@ -125,7 +126,6 @@ public class Paramz implements ConfigurationListener {
 				paramz.add(new Parameter(key, config.getString(key)));
 			}
 		}
-
 		return paramz;
 	}
 
