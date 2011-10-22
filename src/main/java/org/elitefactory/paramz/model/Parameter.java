@@ -1,9 +1,11 @@
 package org.elitefactory.paramz.model;
 
+import java.io.Serializable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Parameter {
+public class Parameter implements Serializable {
 
 	private String name;
 
@@ -16,15 +18,11 @@ public class Parameter {
 		logger.debug("Instantiated parameter");
 	}
 
-	
-	
 	public Parameter(String name, String value) {
 		super();
 		this.name = name;
 		this.value = value;
 	}
-
-
 
 	public String getName() {
 		return name;
