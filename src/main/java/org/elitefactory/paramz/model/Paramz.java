@@ -1,7 +1,9 @@
 package org.elitefactory.paramz.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,21 +51,26 @@ public class Paramz implements ConfigurationListener {
 			existingListenersForKey.add(listener);
 		}
 	}
+	
 
 	public void setConfigurationSources(List<String> configurationFilePaths) {
 		if (configurationFilePaths != null) {
 			for (String configurationFilePath : configurationFilePaths) {
-				try {
-					logger.info("Adding new config file: {}",
-							configurationFilePath);
-					config.addConfiguration(new PropertiesConfiguration(
-							configurationFilePath));
-				} catch (ConfigurationException e) {
-					logger.error(
-							"Something went wrong while initializing configuration sources",
-							e);
-				}
+				addConfigurationSource(configurationFilePath);
 			}
+		}
+	}
+
+	public void addConfigurationSource(String configurationFilePath) {
+		try {
+			logger.info("Adding new config file: {}",
+					configurationFilePath);
+			config.addConfiguration(new PropertiesConfiguration(
+					configurationFilePath));
+		} catch (ConfigurationException e) {
+			logger.error(
+					"Something went wrong while initializing configuration sources",
+					e);
 		}
 	}
 
@@ -86,4 +93,22 @@ public class Paramz implements ConfigurationListener {
 			}
 		}
 	}
+
+	public List<Parameter> getAll() {
+		@SuppressWarnings("unchecked")
+		Iterator<String> keys = config.getKeys();
+		
+		List<Parameter> paramz = new ArrayList<Parameter>();
+		
+		if(keys != null){
+			while (keys.hasNext()) {
+				String key =  keys.next();
+				paramz.add(new Parameter(key, config.getString(key)));
+			}
+		}
+		
+		return paramz;
+	}
+
+	
 }

@@ -16,6 +16,16 @@ public class Parameter {
 		logger.debug("Instantiated parameter");
 	}
 
+	
+	
+	public Parameter(String name, String value) {
+		super();
+		this.name = name;
+		this.value = value;
+	}
+
+
+
 	public String getName() {
 		return name;
 	}

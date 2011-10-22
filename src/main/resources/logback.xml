@@ -8,8 +8,10 @@
     </encoder>
   </appender>
 
-  <root level="debug">
+  <root level="warn">
     <appender-ref ref="STDOUT" />
   </root>
+  
+  <logger name="org.elite" level="debug" />
   
 </configuration>
