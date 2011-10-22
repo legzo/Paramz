@@ -32,6 +32,12 @@ public class Paramz implements ConfigurationListener {
 		config.addConfigurationListener(this);
 	}
 
+	public Paramz(String... configurationSources) {
+		for (String configurationSource : configurationSources) {
+			addConfigurationSource(configurationSource);
+		}
+	}
+
 	public String getParam(String key) {
 		return config.getString(key);
 	}
@@ -51,8 +57,15 @@ public class Paramz implements ConfigurationListener {
 			existingListenersForKey.add(listener);
 		}
 	}
-	
 
+	/**
+	 * Can be used for Spring injection. Please note that the order is important
+	 * : the first file will override the following and so on.
+	 * 
+	 * @param configurationFilePaths
+	 *            list of configuration paths (can be absolute or classpath
+	 *            relative)
+	 */
 	public void setConfigurationSources(List<String> configurationFilePaths) {
 		if (configurationFilePaths != null) {
 			for (String configurationFilePath : configurationFilePaths) {
@@ -61,10 +74,14 @@ public class Paramz implements ConfigurationListener {
 		}
 	}
 
+	/**
+	 * Add a particular file to the list of available configuration sources
+	 * 
+	 * @param configurationFilePath
+	 */
 	public void addConfigurationSource(String configurationFilePath) {
 		try {
-			logger.info("Adding new config file: {}",
-					configurationFilePath);
+			logger.info("Adding new config file: {}", configurationFilePath);
 			config.addConfiguration(new PropertiesConfiguration(
 					configurationFilePath));
 		} catch (ConfigurationException e) {
@@ -79,7 +96,8 @@ public class Paramz implements ConfigurationListener {
 		if (keyThatTriggeredEvent != null
 				&& event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY
 				&& event.isBeforeUpdate()) {
-			logger.debug("Configuration changed because of update on property {}",
+			logger.debug(
+					"Configuration changed because of update on property {}",
 					keyThatTriggeredEvent);
 
 			Set<ParamerUpdateListener> listenersForThisKey = listeners
@@ -87,7 +105,8 @@ public class Paramz implements ConfigurationListener {
 
 			if (listenersForThisKey != null) {
 				for (ParamerUpdateListener listenerForThisKey : listenersForThisKey) {
-					logger.debug("Triggering listener {}", listenerForThisKey.getClass().getSimpleName());
+					logger.debug("Triggering listener {}", listenerForThisKey
+							.getClass().getSimpleName());
 					listenerForThisKey.onConfigChange();
 				}
 			}
@@ -97,18 +116,17 @@ public class Paramz implements ConfigurationListener {
 	public List<Parameter> getAll() {
 		@SuppressWarnings("unchecked")
 		Iterator<String> keys = config.getKeys();
-		
+
 		List<Parameter> paramz = new ArrayList<Parameter>();
-		
-		if(keys != null){
+
+		if (keys != null) {
 			while (keys.hasNext()) {
-				String key =  keys.next();
+				String key = keys.next();
 				paramz.add(new Parameter(key, config.getString(key)));
 			}
 		}
-		
+
 		return paramz;
 	}
 
-	
 }
