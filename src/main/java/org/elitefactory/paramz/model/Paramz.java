@@ -44,10 +44,21 @@ public class Paramz implements ConfigurationListener {
 	}
 
 	public void setParam(String key, String value) {
-		config.setProperty(key, value);
+		if (!value.equals(getParam(key))) {
+			logger.debug("Setting param {}, value={}", key, value);
+			config.setProperty(key, value);
+		}
 	}
 
-	public void addListener(String keyToListenTo, ParamerUpdateListener listener) {
+	public void addListener(String[] keysToListenTo,
+			ParamerUpdateListener listener) {
+		for (String keyToListenTo : keysToListenTo) {
+			addListener(keyToListenTo, listener);
+		}
+	}
+
+	private void addListener(String keyToListenTo,
+			ParamerUpdateListener listener) {
 		if (keyToListenTo != null) {
 			Set<ParamerUpdateListener> existingListenersForKey = listeners
 					.get(keyToListenTo);

@@ -79,12 +79,13 @@ public class ParamzTest {
 		ParamerUpdateListener mockListenerForLogin = mock(ParamerUpdateListener.class);
 		ParamerUpdateListener mockListenerForUrl = mock(ParamerUpdateListener.class);
 
-		paramz.addListener(KEY_LOGIN, mockListenerForLogin);
-		paramz.addListener(KEY_URL, mockListenerForUrl);
+		paramz.addListener(new String[] { KEY_LOGIN, KEY_URL },
+				mockListenerForLogin);
 
-		paramz.setParam(KEY_LOGIN, "value1");
-		paramz.setParam(KEY_LOGIN, "value2");
-		paramz.setParam(KEY_PASSWORD, "value2");
+		paramz.setParam(KEY_LOGIN, "newLoginValue");
+		paramz.setParam(KEY_LOGIN, "newLoginValue");
+		paramz.setParam(KEY_LOGIN, "thisIsReallyANewLoginValue");
+		paramz.setParam(KEY_PASSWORD, "newPassValue");
 
 		verify(mockListenerForLogin, times(2)).onConfigChange();
 
