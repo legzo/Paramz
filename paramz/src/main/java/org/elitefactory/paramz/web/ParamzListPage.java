@@ -1,5 +1,6 @@
 package org.elitefactory.paramz.web;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -11,7 +12,11 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.util.string.Strings;
 import org.elitefactory.paramz.model.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +68,28 @@ public class ParamzListPage extends WebPage {
 	@Override
 	public void renderHead(final IHeaderResponse response) {
 		super.renderHead(response);
-		response.renderCSSReference(new PackageResourceReference(getClass(),
-				"base.css"));
+		PackageResourceReference reference = new PackageResourceReference(
+				getClass(), "bootstrap/bootstrap.less");
+
+		IRequestHandler handler = new ResourceReferenceRequestHandler(
+				reference, null);
+		CharSequence urlChars = RequestCycle.get().urlFor(handler);
+		String url = urlChars.toString();
+
+		if (Strings.isEmpty(url)) {
+			throw new IllegalArgumentException("url cannot be empty or null");
+		}
+		String urlWoSessionId = Strings.stripJSessionId(url);
+		List<String> token = Arrays.asList("css", urlWoSessionId, null);
+		if (response.wasRendered(token) == false) {
+			getResponse().write(
+					"<link rel=\"stylesheet/less\" type=\"text/css\" href=\"");
+			getResponse().write(urlWoSessionId);
+			getResponse().write("\"");
+			getResponse().write(" />");
+			getResponse().write("\n");
+			response.markRendered(token);
+		}
+
 	}
 }
