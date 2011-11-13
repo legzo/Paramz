@@ -1,6 +1,7 @@
 package org.elitefactory.paramz.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +25,8 @@ public class Paramz implements ConfigurationListener {
 
 	private Map<String, Set<ParamerUpdateListener>> listeners = new HashMap<String, Set<ParamerUpdateListener>>();
 
+	private Map<String, Parameter> parameters = new HashMap<String, Parameter>();
+
 	private CombinedConfiguration config = new CombinedConfiguration();
 
 	public Paramz() {
@@ -34,13 +37,11 @@ public class Paramz implements ConfigurationListener {
 
 	public Paramz(String... configurationSources) {
 		super();
-		for (String configurationSource : configurationSources) {
-			addConfigurationSource(configurationSource);
-		}
+		setConfigurationSources(Arrays.asList(configurationSources));
 	}
 
 	public String getParam(String key) {
-		return config.getString(key);
+		return parameters.get(key).getValue();
 	}
 
 	public void setParam(String key, String value) {
@@ -48,6 +49,8 @@ public class Paramz implements ConfigurationListener {
 			logger.debug("Setting param {}, value={}", key, value);
 			config.setProperty(key, value);
 		}
+
+		parameters.get(key).setValue(value);
 	}
 
 	public void addListener(String[] keysToListenTo,
@@ -84,6 +87,8 @@ public class Paramz implements ConfigurationListener {
 				addConfigurationSource(configurationFilePath);
 			}
 		}
+
+		initCache();
 	}
 
 	/**
@@ -125,19 +130,20 @@ public class Paramz implements ConfigurationListener {
 		}
 	}
 
-	public List<Parameter> getAll() {
+	public void initCache() {
 		@SuppressWarnings("unchecked")
 		Iterator<String> keys = config.getKeys();
-
-		List<Parameter> paramz = new ArrayList<Parameter>();
 
 		if (keys != null) {
 			while (keys.hasNext()) {
 				String key = keys.next();
-				paramz.add(new Parameter(key, config.getString(key)));
+				parameters.put(key, new Parameter(key, config.getString(key)));
 			}
 		}
-		return paramz;
+	}
+
+	public List<Parameter> getAll() {
+		return new ArrayList<Parameter>(parameters.values());
 	}
 
 }
