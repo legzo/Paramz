@@ -1,6 +1,8 @@
 package org.elitefactory.paramz.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +10,8 @@ import org.slf4j.LoggerFactory;
 public class Parameter implements Serializable {
 
 	private String name;
+
+	private List<String> previousValues = new ArrayList<String>();
 
 	private String value;
 
@@ -37,6 +41,18 @@ public class Parameter implements Serializable {
 	}
 
 	public void setValue(String value) {
+		if (!previousValues.contains(this.value)) {
+			previousValues.add(this.value);
+		}
+
 		this.value = value;
+	}
+
+	public List<String> getPreviousValues() {
+		return previousValues;
+	}
+
+	public void setPreviousValues(List<String> previousValues) {
+		this.previousValues = previousValues;
 	}
 }

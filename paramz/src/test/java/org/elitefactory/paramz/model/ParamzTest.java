@@ -24,31 +24,23 @@ public class ParamzTest {
 
 	@Test
 	public void shouldInitSuccessfully() {
-		Paramz paramz = new Paramz();
+		Paramz paramz = new Paramz(BASE_PROPERTIES_PATH);
 
-		List<String> configurationFilePaths = new ArrayList<String>();
-		configurationFilePaths.add(BASE_PROPERTIES_PATH);
-
-		paramz.setConfigurationSources(configurationFilePaths);
-
-		assertEquals("http://google.com/API/zoupete", paramz.getParam(KEY_URL));
-		assertEquals("juanita", paramz.getParam(KEY_LOGIN));
-		assertEquals("banana", paramz.getParam(KEY_PASSWORD));
+		assertEquals("http://google.com/API/zoupete",
+				paramz.getParamValue(KEY_URL));
+		assertEquals("juanita", paramz.getParamValue(KEY_LOGIN));
+		assertEquals("banana", paramz.getParamValue(KEY_PASSWORD));
 	}
 
 	@Test
 	public void shouldOverride() {
-		Paramz paramz = new Paramz();
+		Paramz paramz = new Paramz(OVERRIDE_PROPERTIES_PATH,
+				BASE_PROPERTIES_PATH);
 
-		List<String> configurationFilePaths = new ArrayList<String>();
-		configurationFilePaths.add(OVERRIDE_PROPERTIES_PATH);
-		configurationFilePaths.add(BASE_PROPERTIES_PATH);
-
-		paramz.setConfigurationSources(configurationFilePaths);
-
-		assertEquals("http://google.com/API/zoupete", paramz.getParam(KEY_URL));
-		assertEquals("steven", paramz.getParam(KEY_LOGIN));
-		assertEquals("banana", paramz.getParam(KEY_PASSWORD));
+		assertEquals("http://google.com/API/zoupete",
+				paramz.getParamValue(KEY_URL));
+		assertEquals("steven", paramz.getParamValue(KEY_LOGIN));
+		assertEquals("banana", paramz.getParamValue(KEY_PASSWORD));
 	}
 
 	@Test
@@ -61,20 +53,16 @@ public class ParamzTest {
 
 		paramz.setConfigurationSources(configurationFilePaths);
 
-		assertEquals("http://google.com/API/zoupete", paramz.getParam(KEY_URL));
-		assertEquals("juanita", paramz.getParam(KEY_LOGIN));
-		assertEquals("banana", paramz.getParam(KEY_PASSWORD));
+		assertEquals("http://google.com/API/zoupete",
+				paramz.getParamValue(KEY_URL));
+		assertEquals("juanita", paramz.getParamValue(KEY_LOGIN));
+		assertEquals("banana", paramz.getParamValue(KEY_PASSWORD));
 	}
 
 	@Test
 	public void shouldTriggerListener() {
-		Paramz paramz = new Paramz();
-
-		List<String> configurationFilePaths = new ArrayList<String>();
-		configurationFilePaths.add(OVERRIDE_PROPERTIES_PATH);
-		configurationFilePaths.add(BASE_PROPERTIES_PATH);
-
-		paramz.setConfigurationSources(configurationFilePaths);
+		Paramz paramz = new Paramz(OVERRIDE_PROPERTIES_PATH,
+				BASE_PROPERTIES_PATH);
 
 		ParamerUpdateListener mockListenerForLogin = mock(ParamerUpdateListener.class);
 		ParamerUpdateListener mockListenerForUrl = mock(ParamerUpdateListener.class);
@@ -93,6 +81,20 @@ public class ParamzTest {
 		paramz.setParam(KEY_PASSWORD, "value2");
 		verify(mockListenerForLogin, never()).onConfigChange();
 		verify(mockListenerForUrl, never()).onConfigChange();
+	}
+
+	@Test
+	public void shouldKeepHistoryOfPreviousValues() {
+		Paramz paramz = new Paramz(BASE_PROPERTIES_PATH);
+
+		assertEquals(0, paramz.getParam(KEY_URL).getPreviousValues().size());
+
+		paramz.setParam(KEY_URL, "value1");
+		paramz.setParam(KEY_URL, "value2");
+		paramz.setParam(KEY_URL, "value1");
+		paramz.setParam(KEY_URL, "value2");
+
+		assertEquals(3, paramz.getParam(KEY_URL).getPreviousValues().size());
 	}
 
 }

@@ -36,21 +36,25 @@ public class Paramz implements ConfigurationListener {
 	}
 
 	public Paramz(String... configurationSources) {
-		super();
+		this();
 		setConfigurationSources(Arrays.asList(configurationSources));
 	}
 
-	public String getParam(String key) {
+	public Parameter getParam(String key) {
+		return parameters.get(key);
+	}
+
+	public String getParamValue(String key) {
 		return parameters.get(key).getValue();
 	}
 
 	public void setParam(String key, String value) {
-		if (!value.equals(getParam(key))) {
+		if (!value.equals(getParamValue(key))) {
 			logger.debug("Setting param {}, value={}", key, value);
 			config.setProperty(key, value);
 		}
-
 		parameters.get(key).setValue(value);
+
 	}
 
 	public void addListener(String[] keysToListenTo,
