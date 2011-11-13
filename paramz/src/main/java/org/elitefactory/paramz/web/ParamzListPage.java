@@ -1,17 +1,22 @@
 package org.elitefactory.paramz.web;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PropertyListView;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
@@ -25,6 +30,8 @@ public class ParamzListPage extends WebPage {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(ParamzListPage.class);
+
+	private List<Component> componentsToRedraw = new ArrayList<Component>();
 
 	public ParamzListPage() {
 
@@ -45,6 +52,11 @@ public class ParamzListPage extends WebPage {
 							updatedParameter.getName(),
 							updatedParameter.getValue());
 				}
+
+				for (Component component : componentsToRedraw) {
+					target.add(component);
+				}
+
 			}
 
 			@Override
@@ -61,11 +73,23 @@ public class ParamzListPage extends WebPage {
 			protected void populateItem(ListItem<Parameter> item) {
 				item.add(new Label("name"));
 				item.add(new TextField<String>("value"));
+
+				DropDownChoice<String> previousValuesChoice = new DropDownChoice<String>(
+						"previousValues", new Model<String>(),
+						new PropertyModel<List<String>>(item.getModel(),
+								"previousValues"));
+				previousValuesChoice.setOutputMarkupId(true);
+
+				item.add(previousValuesChoice);
+				componentsToRedraw.add(previousValuesChoice);
 			}
 		};
 	}
 
 	@Override
+	/**
+	 * TODO Extract to utility method... 
+	 */
 	public void renderHead(final IHeaderResponse response) {
 		super.renderHead(response);
 		PackageResourceReference reference = new PackageResourceReference(

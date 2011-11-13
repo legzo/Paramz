@@ -53,6 +53,10 @@ public class Parameter implements Serializable {
 	}
 
 	public void setPreviousValues(List<String> previousValues) {
-		this.previousValues = previousValues;
+		if (previousValues == null) {
+			this.previousValues = new ArrayList<String>();
+		} else {
+			this.previousValues = previousValues;
+		}
 	}
 }
