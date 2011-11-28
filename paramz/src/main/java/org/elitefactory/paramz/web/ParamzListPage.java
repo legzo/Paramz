@@ -108,6 +108,12 @@ public class ParamzListPage extends WebPage {
 	 */
 	public void renderHead(final IHeaderResponse response) {
 		super.renderHead(response);
+
+		// adding specific CSS
+		response.renderCSSReference(new PackageResourceReference(getClass(),
+				"base.css"));
+
+		// adding bootstrap LESS file
 		PackageResourceReference reference = new PackageResourceReference(
 				getClass(), "bootstrap/bootstrap.less");
 

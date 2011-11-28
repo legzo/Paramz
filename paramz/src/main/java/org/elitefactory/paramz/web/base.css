@@ -1,3 +1,11 @@
-#params-list input {
-	width: 300px;
+#params-list input,
+#params-list textarea,
+#params-list select,
+#params-list .uneditable-input {
+	height: auto;	
+	width: 100%;
+}
+
+.container {
+	margin-top: 40px;	
 }

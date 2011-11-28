@@ -49,7 +49,6 @@ public class Paramz implements ConfigurationListener {
 	}
 
 	public void setParam(String key, String value) {
-		logger.debug("Setting invoked", key, value);
 		if (value != null && !value.equals(getParamValue(key))) {
 			logger.debug("Setting param {}, value={}", key, value);
 			config.setProperty(key, value);
