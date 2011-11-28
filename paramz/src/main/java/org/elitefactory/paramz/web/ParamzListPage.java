@@ -1,11 +1,10 @@
 package org.elitefactory.paramz.web;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.WebPage;
@@ -14,7 +13,8 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PropertyListView;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestHandler;
@@ -30,33 +30,19 @@ public class ParamzListPage extends WebPage {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(ParamzListPage.class);
-
-	private List<Component> componentsToRedraw = new ArrayList<Component>();
+	Form<List<Parameter>> form;
 
 	public ParamzListPage() {
 
-		final Form<List<Parameter>> form = new Form<List<Parameter>>(
-				"paramsForm");
-		final PropertyListView<Parameter> listView = getListView();
+		form = new Form<List<Parameter>>("paramsForm");
 
-		form.add(listView);
+		form.add(getListView());
 		form.add(new AjaxButton("submitButton") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				logger.trace("Form submitted");
-
-				List<Parameter> updatedParameters = listView.getModelObject();
-				for (Parameter updatedParameter : updatedParameters) {
-					ParamzApplication.getParamzService().setParam(
-							updatedParameter.getName(),
-							updatedParameter.getValue());
-				}
-
-				for (Component component : componentsToRedraw) {
-					target.add(component);
-				}
-
+				target.add(form);
 			}
 
 			@Override
@@ -67,23 +53,53 @@ public class ParamzListPage extends WebPage {
 		add(form);
 	}
 
-	private PropertyListView<Parameter> getListView() {
-		return new PropertyListView<Parameter>("paramsList", new ParamzModel()) {
+	private ListView<Parameter> getListView() {
+		ListView<Parameter> listView = new ListView<Parameter>("paramsList",
+				new ParamzModel()) {
 			@Override
-			protected void populateItem(ListItem<Parameter> item) {
-				item.add(new Label("name"));
-				item.add(new TextField<String>("value"));
+			protected void populateItem(final ListItem<Parameter> item) {
+				final TextField<String> valueTextField = new TextField<String>(
+						"value", new LoadableDetachableModel<String>() {
+							@Override
+							protected String load() {
+								return item.getModelObject().getValue();
+							}
 
-				DropDownChoice<String> previousValuesChoice = new DropDownChoice<String>(
-						"previousValues", new Model<String>(),
+							@Override
+							public void setObject(String newValue) {
+								ParamzApplication.getParamzService().setParam(
+										item.getModelObject().getName(),
+										newValue);
+							}
+
+						});
+				valueTextField.setOutputMarkupId(true);
+				final Model<String> dropdownModel = new Model<String>();
+				final DropDownChoice<String> previousValuesChoice = new DropDownChoice<String>(
+						"previousValues", dropdownModel,
 						new PropertyModel<List<String>>(item.getModel(),
 								"previousValues"));
 				previousValuesChoice.setOutputMarkupId(true);
+				previousValuesChoice.add(new AjaxFormComponentUpdatingBehavior(
+						"onChange") {
+					@Override
+					protected void onUpdate(AjaxRequestTarget target) {
+						valueTextField.getModel().setObject(
+								dropdownModel.getObject());
+						target.add(form);
+					}
+				});
 
+				item.add(new Label("name", new Model<String>(item
+						.getModelObject().getName())));
+				item.add(valueTextField);
 				item.add(previousValuesChoice);
-				componentsToRedraw.add(previousValuesChoice);
 			}
+
 		};
+
+		listView.setOutputMarkupId(true);
+		return listView;
 	}
 
 	@Override
