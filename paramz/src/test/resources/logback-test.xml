@@ -13,5 +13,7 @@
   </root>
   
   <logger name="org.elitefactory" level="trace" />
+  <logger name="ch.qos.logback" level="warn" />
+  
   
 </configuration>

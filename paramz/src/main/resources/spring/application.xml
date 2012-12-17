@@ -12,7 +12,11 @@
 	<bean id="paramz" class="org.elitefactory.paramz.model.Paramz">
 		<property name="configurationSources">
 			<list>
-				<value>props/default.properties</value>
+				<value>/data/conf/combined.xml</value>
+				
+				<value>/data/conf/local.xml</value>
+				
+				<value>props/default.xml</value>
 			</list>
 		</property>
 	</bean>

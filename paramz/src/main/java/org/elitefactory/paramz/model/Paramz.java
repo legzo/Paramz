@@ -12,7 +12,7 @@ import java.util.Set;
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.CombinedConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.event.ConfigurationEvent;
 import org.apache.commons.configuration.event.ConfigurationListener;
 import org.apache.commons.configuration.tree.OverrideCombiner;
@@ -23,11 +23,13 @@ public class Paramz implements ConfigurationListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(Paramz.class);
 
-	private Map<String, Set<ParamerUpdateListener>> listeners = new HashMap<String, Set<ParamerUpdateListener>>();
+	private final Map<String, Set<ParamerUpdateListener>> listeners = new HashMap<String, Set<ParamerUpdateListener>>();
 
-	private Map<String, Parameter> parameters = new HashMap<String, Parameter>();
+	private final Map<String, Parameter> parameters = new HashMap<String, Parameter>();
 
-	private CombinedConfiguration config = new CombinedConfiguration();
+	private final CombinedConfiguration config = new CombinedConfiguration();
+
+	private String localConfigurationFile;
 
 	public Paramz() {
 		logger.debug("Initializing Paramz");
@@ -35,21 +37,29 @@ public class Paramz implements ConfigurationListener {
 		config.addConfigurationListener(this);
 	}
 
-	public Paramz(String... configurationSources) {
+	public Paramz(final String... configurationSources) {
 		this();
+		if (configurationSources.length <= 0) {
+			throw new IllegalArgumentException("You must provide at least one configuration source !");
+		}
+
 		setConfigurationSources(Arrays.asList(configurationSources));
 	}
 
-	public Parameter getParam(String key) {
+	public Parameter getParam(final String key) {
 		return parameters.get(key);
 	}
 
-	public String getParamValue(String key) {
-		return parameters.get(key).getValue();
+	public String getString(final String key) {
+		return config.getString(key);
 	}
 
-	public void setParam(String key, String value) {
-		if (value != null && !value.equals(getParamValue(key))) {
+	public boolean getBoolean(final String key) {
+		return config.getBoolean(key);
+	}
+
+	public void setParam(final String key, final String value) {
+		if (value != null && !value.equals(getString(key))) {
 			logger.debug("Setting param {}, value={}", key, value);
 			config.setProperty(key, value);
 		}
@@ -57,18 +67,15 @@ public class Paramz implements ConfigurationListener {
 
 	}
 
-	public void addListener(String[] keysToListenTo,
-			ParamerUpdateListener listener) {
-		for (String keyToListenTo : keysToListenTo) {
+	public void addListener(final String[] keysToListenTo, final ParamerUpdateListener listener) {
+		for (final String keyToListenTo : keysToListenTo) {
 			addListener(keyToListenTo, listener);
 		}
 	}
 
-	private void addListener(String keyToListenTo,
-			ParamerUpdateListener listener) {
+	private void addListener(final String keyToListenTo, final ParamerUpdateListener listener) {
 		if (keyToListenTo != null) {
-			Set<ParamerUpdateListener> existingListenersForKey = listeners
-					.get(keyToListenTo);
+			Set<ParamerUpdateListener> existingListenersForKey = listeners.get(keyToListenTo);
 			if (existingListenersForKey == null) {
 				existingListenersForKey = new HashSet<ParamerUpdateListener>();
 				listeners.put(keyToListenTo, existingListenersForKey);
@@ -78,16 +85,18 @@ public class Paramz implements ConfigurationListener {
 	}
 
 	/**
-	 * Can be used for Spring injection. Please note that the order is important
-	 * : the first file will override the following and so on.
+	 * Can be used for Spring injection. Please note that the order is important : the first file will override the
+	 * following and so on.
 	 * 
 	 * @param configurationFilePaths
-	 *            list of configuration paths (can be absolute or classpath
-	 *            relative)
+	 *            list of configuration paths (can be absolute or classpath relative)
 	 */
-	public void setConfigurationSources(List<String> configurationFilePaths) {
+	public void setConfigurationSources(final List<String> configurationFilePaths) {
+
 		if (configurationFilePaths != null) {
-			for (String configurationFilePath : configurationFilePaths) {
+			localConfigurationFile = configurationFilePaths.get(0);
+
+			for (final String configurationFilePath : configurationFilePaths) {
 				addConfigurationSource(configurationFilePath);
 			}
 		}
@@ -100,34 +109,26 @@ public class Paramz implements ConfigurationListener {
 	 * 
 	 * @param configurationFilePath
 	 */
-	public void addConfigurationSource(String configurationFilePath) {
+	public void addConfigurationSource(final String configurationFilePath) {
 		try {
-			logger.info("Adding new config file: {}", configurationFilePath);
-			config.addConfiguration(new PropertiesConfiguration(
-					configurationFilePath));
-		} catch (ConfigurationException e) {
-			logger.error(
-					"Something went wrong while initializing configuration sources",
-					e);
+			config.addConfiguration(new XMLConfiguration(configurationFilePath));
+			logger.info("Added new config file: {}", configurationFilePath);
+		} catch (final ConfigurationException e) {
+			logger.warn("Could not find configuration file @ {}", configurationFilePath);
 		}
 	}
 
-	public void configurationChanged(ConfigurationEvent event) {
-		String keyThatTriggeredEvent = event.getPropertyName();
-		if (keyThatTriggeredEvent != null
-				&& event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY
+	public void configurationChanged(final ConfigurationEvent event) {
+		final String keyThatTriggeredEvent = event.getPropertyName();
+		if (keyThatTriggeredEvent != null && event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY
 				&& event.isBeforeUpdate()) {
-			logger.trace(
-					"Configuration changed because of update on property {}",
-					keyThatTriggeredEvent);
+			logger.trace("Configuration changed because of update on property {}", keyThatTriggeredEvent);
 
-			Set<ParamerUpdateListener> listenersForThisKey = listeners
-					.get(keyThatTriggeredEvent);
+			final Set<ParamerUpdateListener> listenersForThisKey = listeners.get(keyThatTriggeredEvent);
 
 			if (listenersForThisKey != null) {
-				for (ParamerUpdateListener listenerForThisKey : listenersForThisKey) {
-					logger.debug("Triggering listener {}", listenerForThisKey
-							.getClass().getSimpleName());
+				for (final ParamerUpdateListener listenerForThisKey : listenersForThisKey) {
+					logger.debug("Triggering listener {}", listenerForThisKey.getClass().getSimpleName());
 					listenerForThisKey.onConfigChange();
 				}
 			}
@@ -135,12 +136,11 @@ public class Paramz implements ConfigurationListener {
 	}
 
 	public void initCache() {
-		@SuppressWarnings("unchecked")
-		Iterator<String> keys = config.getKeys();
+		final Iterator<String> keys = config.getKeys();
 
 		if (keys != null) {
 			while (keys.hasNext()) {
-				String key = keys.next();
+				final String key = keys.next();
 				parameters.put(key, new Parameter(key, config.getString(key)));
 			}
 		}
@@ -148,6 +148,21 @@ public class Paramz implements ConfigurationListener {
 
 	public List<Parameter> getAll() {
 		return new ArrayList<Parameter>(parameters.values());
+	}
+
+	public void saveToFile() {
+		final XMLConfiguration result = new XMLConfiguration(config);
+		try {
+			logger.debug("Saving combined config to file : {}", localConfigurationFile);
+			result.save(localConfigurationFile);
+
+			for (final Parameter param : parameters.values()) {
+				param.setDirty(false);
+			}
+
+		} catch (final ConfigurationException e) {
+			logger.error("Could not save combined configuration...", e);
+		}
 	}
 
 }
