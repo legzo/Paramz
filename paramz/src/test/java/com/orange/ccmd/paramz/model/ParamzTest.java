@@ -1,12 +1,13 @@
-package org.elitefactory.paramz.model;
+package com.orange.ccmd.paramz.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
+import com.orange.ccmd.paramz.model.Paramz;
+
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 public class ParamzTest {
 
@@ -49,28 +50,6 @@ public class ParamzTest {
 		assertEquals("http://google.com/API/zoupete", paramz.getString(KEY_URL));
 		assertEquals("juanita", paramz.getString(KEY_LOGIN));
 		assertEquals("banana", paramz.getString(KEY_PASSWORD));
-	}
-
-	@Test
-	public void shouldTriggerListener() {
-		final Paramz paramz = new Paramz(OVERRIDE_PROPERTIES_PATH, BASE_PROPERTIES_PATH);
-
-		final ParamerUpdateListener mockListenerForLogin = mock(ParamerUpdateListener.class);
-		final ParamerUpdateListener mockListenerForUrl = mock(ParamerUpdateListener.class);
-
-		paramz.addListener(new String[] { KEY_LOGIN, KEY_URL }, mockListenerForLogin);
-
-		paramz.setParam(KEY_LOGIN, "newLoginValue");
-		paramz.setParam(KEY_LOGIN, "newLoginValue");
-		paramz.setParam(KEY_LOGIN, "thisIsReallyANewLoginValue");
-		paramz.setParam(KEY_PASSWORD, "newPassValue");
-
-		verify(mockListenerForLogin, times(2)).onConfigChange();
-
-		reset(mockListenerForLogin);
-		paramz.setParam(KEY_PASSWORD, "value2");
-		verify(mockListenerForLogin, never()).onConfigChange();
-		verify(mockListenerForUrl, never()).onConfigChange();
 	}
 
 	@Test

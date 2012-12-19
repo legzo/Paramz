@@ -1,29 +1,22 @@
-package org.elitefactory.paramz.model;
+package com.orange.ccmd.paramz.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.CombinedConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.configuration.event.ConfigurationEvent;
-import org.apache.commons.configuration.event.ConfigurationListener;
 import org.apache.commons.configuration.tree.OverrideCombiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Paramz implements ConfigurationListener {
+public class Paramz {
 
 	private static final Logger logger = LoggerFactory.getLogger(Paramz.class);
-
-	private final Map<String, Set<ParamerUpdateListener>> listeners = new HashMap<String, Set<ParamerUpdateListener>>();
 
 	private final Map<String, Parameter> parameters = new HashMap<String, Parameter>();
 
@@ -34,7 +27,6 @@ public class Paramz implements ConfigurationListener {
 	public Paramz() {
 		logger.debug("Initializing Paramz");
 		config.setNodeCombiner(new OverrideCombiner());
-		config.addConfigurationListener(this);
 	}
 
 	public Paramz(final String... configurationSources) {
@@ -65,23 +57,6 @@ public class Paramz implements ConfigurationListener {
 		}
 		parameters.get(key).setValue(value);
 
-	}
-
-	public void addListener(final String[] keysToListenTo, final ParamerUpdateListener listener) {
-		for (final String keyToListenTo : keysToListenTo) {
-			addListener(keyToListenTo, listener);
-		}
-	}
-
-	private void addListener(final String keyToListenTo, final ParamerUpdateListener listener) {
-		if (keyToListenTo != null) {
-			Set<ParamerUpdateListener> existingListenersForKey = listeners.get(keyToListenTo);
-			if (existingListenersForKey == null) {
-				existingListenersForKey = new HashSet<ParamerUpdateListener>();
-				listeners.put(keyToListenTo, existingListenersForKey);
-			}
-			existingListenersForKey.add(listener);
-		}
 	}
 
 	/**
@@ -115,23 +90,6 @@ public class Paramz implements ConfigurationListener {
 			logger.info("Added new config file: {}", configurationFilePath);
 		} catch (final ConfigurationException e) {
 			logger.warn("Could not find configuration file @ {}", configurationFilePath);
-		}
-	}
-
-	public void configurationChanged(final ConfigurationEvent event) {
-		final String keyThatTriggeredEvent = event.getPropertyName();
-		if (keyThatTriggeredEvent != null && event.getType() == AbstractConfiguration.EVENT_SET_PROPERTY
-				&& event.isBeforeUpdate()) {
-			logger.trace("Configuration changed because of update on property {}", keyThatTriggeredEvent);
-
-			final Set<ParamerUpdateListener> listenersForThisKey = listeners.get(keyThatTriggeredEvent);
-
-			if (listenersForThisKey != null) {
-				for (final ParamerUpdateListener listenerForThisKey : listenersForThisKey) {
-					logger.debug("Triggering listener {}", listenerForThisKey.getClass().getSimpleName());
-					listenerForThisKey.onConfigChange();
-				}
-			}
 		}
 	}
 

@@ -1,7 +1,8 @@
-package org.elitefactory.paramz.web;
+package com.orange.ccmd.paramz.web;
 
 import java.util.List;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -10,6 +11,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -17,18 +19,21 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.elitefactory.paramz.model.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ParamzListPage extends WebPage {
+import com.orange.ccmd.paramz.model.Parameter;
+import com.orange.ccmd.paramz.model.Paramz;
+
+public abstract class ParamzListPage extends WebPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(ParamzListPage.class);
 	private final Form<List<Parameter>> form;
 
 	public ParamzListPage() {
+		setStatelessHint(true);
 
-		form = new Form<List<Parameter>>("paramsForm");
+		form = new StatelessForm<List<Parameter>>("paramsForm");
 
 		form.add(getListView());
 		form.add(new AjaxButton("submitButton") {
@@ -49,7 +54,7 @@ public class ParamzListPage extends WebPage {
 			@Override
 			protected void onSubmit(final AjaxRequestTarget target, final Form<?> form) {
 				logger.trace("Save to file requested");
-				ParamzApplication.getParamzService().saveToFile();
+				getParamzService().saveToFile();
 
 				target.add(form);
 			}
@@ -63,7 +68,8 @@ public class ParamzListPage extends WebPage {
 	}
 
 	private ListView<Parameter> getListView() {
-		final ListView<Parameter> listView = new ListView<Parameter>("paramsList", new ParamzModel()) {
+		final ListView<Parameter> listView = new ListView<Parameter>("paramsList", new ParamzModel(
+				getConfigProviderId())) {
 			@Override
 			protected void populateItem(final ListItem<Parameter> item) {
 				final TextField<String> valueTextField = new TextField<String>("value",
@@ -75,8 +81,7 @@ public class ParamzListPage extends WebPage {
 
 							@Override
 							public void setObject(final String newValue) {
-								ParamzApplication.getParamzService()
-										.setParam(item.getModelObject().getName(), newValue);
+								getParamzService().setParam(item.getModelObject().getName(), newValue);
 							}
 
 						});
@@ -93,17 +98,23 @@ public class ParamzListPage extends WebPage {
 					}
 				});
 
-				final String dirtyFlag = item.getModelObject().isDirty() ? "*" : "";
+				final String dirtyFlag = item.getModelObject().isDirty() ? "dirty" : "";
 
-				item.add(new Label("name", new Model<String>(item.getModelObject().getName() + dirtyFlag)));
+				final Label label = new Label("name", new Model<String>(item.getModelObject().getName()));
+				label.add(new AttributeModifier("class", dirtyFlag));
+
+				item.add(label);
 				item.add(valueTextField);
 				item.add(previousValuesChoice);
 			}
-
 		};
 
 		listView.setOutputMarkupId(true);
 		return listView;
+	}
+
+	private Paramz getParamzService() {
+		return ParamzApplication.getConfigProvider(getConfigProviderId());
 	}
 
 	@Override
@@ -111,6 +122,10 @@ public class ParamzListPage extends WebPage {
 		response.renderCSSReference(new PackageResourceReference(ParamzListPage.class,
 				"bootstrap/css/bootstrap.min.css"));
 		response.renderCSSReference(new PackageResourceReference(ParamzListPage.class, "base.css"));
+	}
+
+	protected String getConfigProviderId() {
+		return getClass().getSimpleName().toLowerCase();
 	}
 
 }

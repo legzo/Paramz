@@ -1,4 +1,4 @@
-package org.elitefactory.paramz.model;
+package com.orange.ccmd.paramz.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
