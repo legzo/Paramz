@@ -26,6 +26,15 @@ public class Parameter implements Serializable {
 		this.value = value;
 	}
 
+	public Parameter(final String name, final String value, final String previousValue) {
+		super();
+		this.name = name;
+		this.value = value;
+		if (previousValue != null) {
+			this.previousValues.add(previousValue);
+		}
+	}
+
 	public String getName() {
 		return name;
 	}
