@@ -51,6 +51,10 @@ public class Paramz {
 	public String getString(final String key) {
 		return config.getString(key);
 	}
+	
+	public String[] getStringArray(final String key) {
+		return config.getStringArray(key);
+	}
 
 	public boolean getBoolean(final String key) {
 		return config.getBoolean(key);
