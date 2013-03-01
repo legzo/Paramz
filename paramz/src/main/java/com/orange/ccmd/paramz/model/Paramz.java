@@ -9,9 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.CombinedConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.apache.commons.configuration.tree.OverrideCombiner;
 import org.apache.wicket.util.file.Files;
 import org.slf4j.Logger;
@@ -23,6 +25,8 @@ public class Paramz {
 	private static final String BACKUP_EXTENSION = ".bak";
 
 	private final Map<String, Parameter> parameters = new HashMap<String, Parameter>();
+
+	private int refreshDelay = 5000;
 
 	private final CombinedConfiguration config = new CombinedConfiguration();
 	private final CombinedConfiguration backupConfig = new CombinedConfiguration();
@@ -51,13 +55,9 @@ public class Paramz {
 	public String getString(final String key) {
 		return config.getString(key);
 	}
-	
-	public String[] getStringArray(final String key) {
-		return config.getStringArray(key);
-	}
 
-	public boolean getBoolean(final String key) {
-		return config.getBoolean(key);
+	public AbstractConfiguration getConfig() {
+		return config;
 	}
 
 	public void setParam(final String key, final String value) {
@@ -70,12 +70,11 @@ public class Paramz {
 	}
 
 	/**
-	 * Can be used for Spring injection. Please note that the order is important
-	 * : the first file will override the following and so on.
+	 * Can be used for Spring injection. Please note that the order is important : the first file will override the
+	 * following and so on.
 	 * 
 	 * @param configurationFilePaths
-	 *            list of configuration paths (can be absolute or classpath
-	 *            relative)
+	 *            list of configuration paths (can be absolute or classpath relative)
 	 */
 	public void setConfigurationSources(final List<String> configurationFilePaths) {
 
@@ -85,6 +84,10 @@ public class Paramz {
 
 			for (final String configurationFilePath : configurationFilePaths) {
 				addConfigurationSource(configurationFilePath);
+			}
+
+			if (config.getConfigurations().isEmpty()) {
+				logger.error("Not one of the listed configuration files was found, check the pathes listed above");
 			}
 		}
 
@@ -98,7 +101,12 @@ public class Paramz {
 	 */
 	public void addConfigurationSource(final String configurationFilePath) {
 		try {
-			config.addConfiguration(new XMLConfiguration(configurationFilePath));
+			final XMLConfiguration configuration = new XMLConfiguration(configurationFilePath);
+			final FileChangedReloadingStrategy reloadingStrategy = new FileChangedReloadingStrategy();
+			reloadingStrategy.setRefreshDelay(refreshDelay);
+			configuration.setReloadingStrategy(reloadingStrategy);
+
+			config.addConfiguration(configuration);
 			logger.info("Added new config file: {}", configurationFilePath);
 		} catch (final ConfigurationException e) {
 			logger.warn("Could not find configuration file @ {}", configurationFilePath);
@@ -153,9 +161,13 @@ public class Paramz {
 	private void backupFile() {
 		try {
 			Files.copy(new File(localConfigurationFile), new File(localConfigurationFile + BACKUP_EXTENSION));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error while doing configuration backup", e);
 		}
+	}
+
+	public void setRefreshDelay(final int refreshDelay) {
+		this.refreshDelay = refreshDelay;
 	}
 
 }
