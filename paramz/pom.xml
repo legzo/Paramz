@@ -21,10 +21,10 @@
 	</scm>
 
 	<distributionManagement>
-		<repository>
+		<!--repository>
 			<id>nexus.release</id>
 			<url>http://10.184.57.129:9090/nexus/content/repositories/releases/</url>
-		</repository>
+		</repository-->
 		<snapshotRepository>
 			<id>nexus.snapshot</id>
 			<url>http://10.184.57.129:9090/nexus/content/repositories/snapshots/</url>
