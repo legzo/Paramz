@@ -1,0 +1,9 @@
+<config>
+	<awesome>
+		<service>
+			<url>http://google.com/API/zoupete</url>
+			<login>juanita</login>
+			<password>banana</password>
+		</service>
+	</awesome>
+</config>

@@ -15,9 +15,9 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.apache.commons.configuration.tree.OverrideCombiner;
-import org.apache.wicket.util.file.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.FileCopyUtils;
 
 public class Paramz {
 
@@ -160,7 +160,7 @@ public class Paramz {
 
 	private void backupFile() {
 		try {
-			Files.copy(new File(localConfigurationFile), new File(localConfigurationFile + BACKUP_EXTENSION));
+			FileCopyUtils.copy(new File(localConfigurationFile), new File(localConfigurationFile + BACKUP_EXTENSION));
 		} catch (final IOException e) {
 			logger.error("Error while doing configuration backup", e);
 		}

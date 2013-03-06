@@ -33,7 +33,7 @@ public class ParamzApplication extends WebApplication {
 			final Paramz configProvider = entry.getValue();
 
 			final String configProviderId = page.getSimpleName().toLowerCase();
-			logger.warn("mounting {} to /{}", entry.getValue(), configProviderId);
+			logger.info("mounting {} to /{}", entry.getValue(), configProviderId);
 			configProviders.put(configProviderId, configProvider);
 			mappings.put(configProviderId, page);
 		}

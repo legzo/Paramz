@@ -13,3 +13,7 @@
 .buttons {
 	text-align: right;
 }
+
+.dirty:after {
+    content: '*';
+}
