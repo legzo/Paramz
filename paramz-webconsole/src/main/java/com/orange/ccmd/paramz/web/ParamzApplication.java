@@ -12,7 +12,7 @@ import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.orange.ccmd.paramz.model.Paramz;
+import com.orange.ccmd.paramz.Paramz;
 
 public class ParamzApplication extends WebApplication {
 

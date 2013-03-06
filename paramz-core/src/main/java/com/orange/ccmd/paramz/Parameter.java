@@ -1,4 +1,4 @@
-package com.orange.ccmd.paramz.model;
+package com.orange.ccmd.paramz;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Parameter implements Serializable {
+public class Parameter implements Serializable, Comparable<Parameter> {
 
 	private String name;
 	private String value;
@@ -31,7 +31,7 @@ public class Parameter implements Serializable {
 		this.name = name;
 		this.value = value;
 		if (previousValue != null) {
-			this.previousValues.add(previousValue);
+			previousValues.add(previousValue);
 		}
 	}
 
@@ -51,9 +51,12 @@ public class Parameter implements Serializable {
 		if (!previousValues.contains(this.value)) {
 			previousValues.add(this.value);
 		}
-
+		// check if value has changed
+		if (!this.value.equals(value)) {
+			isDirty = true;
+		}
+		// set new value
 		this.value = value;
-		isDirty = true;
 	}
 
 	public List<String> getPreviousValues() {
@@ -74,5 +77,10 @@ public class Parameter implements Serializable {
 
 	public void setDirty(final boolean isDirty) {
 		this.isDirty = isDirty;
+	}
+
+	@Override
+	public int compareTo(final Parameter o) {
+		return getName().compareTo(o.getName());
 	}
 }

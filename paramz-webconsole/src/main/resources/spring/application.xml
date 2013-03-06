@@ -15,16 +15,9 @@
 		</property>
 	</bean>
 
-	<bean id="paramz" class="com.orange.ccmd.paramz.model.Paramz">
-		<property name="configurationSources">
-			<list>
-				<value>/data/conf/combined.xml</value>
-				
-				<value>/data/conf/local.xml</value>
-				
-				<value>props/default.xml</value>
-			</list>
-		</property>
+	<bean id="paramz" class="com.orange.ccmd.paramz.Paramz">
+		<property name="localConfigurationFile" value="/data/conf/local.xml" />
+		<property name="defaultConfigurationFile" value="props/default.xml" />
 	</bean>
 
 </beans>

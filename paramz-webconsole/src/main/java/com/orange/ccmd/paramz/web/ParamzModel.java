@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.orange.ccmd.paramz.model.Parameter;
+import com.orange.ccmd.paramz.Parameter;
 
 public class ParamzModel extends LoadableDetachableModel<List<Parameter>> {
 

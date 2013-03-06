@@ -22,8 +22,8 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.orange.ccmd.paramz.model.Parameter;
-import com.orange.ccmd.paramz.model.Paramz;
+import com.orange.ccmd.paramz.Parameter;
+import com.orange.ccmd.paramz.Paramz;
 
 public abstract class ParamzListPage extends WebPage {
 
