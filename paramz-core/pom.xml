@@ -10,6 +10,6 @@
 
 	<artifactId>paramz-core</artifactId>
 	<packaging>jar</packaging>
-	<name>paramz</name>
+	<name>paramz-core</name>
 
 </project>

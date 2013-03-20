@@ -13,7 +13,7 @@
 	<version>0.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<description>A quick configuration tool for apps</description>
-	<name>paramz</name>
+	<name>paramz-parent</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>

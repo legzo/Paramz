@@ -10,7 +10,7 @@
 
 	<artifactId>paramz-webconsole</artifactId>
 	<packaging>jar</packaging>
-	<name>paramz</name>
+	<name>paramz-webconsole</name>
 
 	<dependencies>
 		<dependency>
