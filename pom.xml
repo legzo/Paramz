@@ -9,7 +9,7 @@
 
 	<groupId>com.orange.ccmd</groupId>
 	<artifactId>paramz-parent</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<description>A quick configuration tool for apps</description>
 	<name>paramz-parent</name>
