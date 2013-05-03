@@ -4,4 +4,6 @@
 *.class
 *.jar
 *.war
+*.iml
+*.ipr
 target/
