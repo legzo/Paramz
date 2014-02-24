@@ -1,4 +1,4 @@
-package com.orange.ccmd.paramz;
+package com.orange.ccmd.paramz.config;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;

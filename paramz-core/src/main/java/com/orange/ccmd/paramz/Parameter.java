@@ -12,7 +12,8 @@ public class Parameter implements Serializable, Comparable<Parameter> {
 	private String name;
 	private String value;
 	private List<String> previousValues = new ArrayList<String>();
-	private boolean isDirty;
+	private boolean isDirtyNodeLevel;
+	private boolean isDirtyClusterLevel;
 
 	private final static Logger logger = LoggerFactory.getLogger(Parameter.class);
 
@@ -47,16 +48,33 @@ public class Parameter implements Serializable, Comparable<Parameter> {
 		return value;
 	}
 
-	public void setValue(final String value) {
-		if (!previousValues.contains(this.value)) {
-			previousValues.add(this.value);
+	public void setValueNodeLevel(final String newValue) {
+		if (!previousValues.contains(value)) {
+			previousValues.add(value);
 		}
 		// check if value has changed
-		if (!this.value.equals(value)) {
-			isDirty = true;
+		if (!value.equals(newValue)) {
+			isDirtyNodeLevel = true;
 		}
 		// set new value
-		this.value = value;
+		value = newValue;
+	}
+
+	public void setValueClusterLevel(final String newValue) {
+		if (!previousValues.contains(value)) {
+			previousValues.add(value);
+		}
+
+		if (!previousValues.contains(newValue)) {
+			previousValues.add(newValue);
+		}
+
+		// check if value has changed
+		if (!value.equals(newValue)) {
+			isDirtyClusterLevel = true;
+		}
+		// set new value
+		value = newValue;
 	}
 
 	public List<String> getPreviousValues() {
@@ -71,16 +89,26 @@ public class Parameter implements Serializable, Comparable<Parameter> {
 		}
 	}
 
-	public boolean isDirty() {
-		return isDirty;
-	}
-
-	public void setDirty(final boolean isDirty) {
-		this.isDirty = isDirty;
-	}
 
 	@Override
 	public int compareTo(final Parameter o) {
 		return getName().compareTo(o.getName());
 	}
+
+	public boolean isDirtyNodeLevel() {
+		return isDirtyNodeLevel;
+	}
+
+	public void setDirtyNodeLevel(boolean isDirtyNodeLevel) {
+		this.isDirtyNodeLevel = isDirtyNodeLevel;
+	}
+
+	public boolean isDirtyClusterLevel() {
+		return isDirtyClusterLevel;
+	}
+
+	public void setDirtyClusterLevel(boolean isDirtyClusterLevel) {
+		this.isDirtyClusterLevel = isDirtyClusterLevel;
+	}
+
 }

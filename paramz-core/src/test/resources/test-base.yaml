@@ -1,0 +1,5 @@
+awesome :
+  service : 
+    url : http://google.com/API/zoupete
+    login : juanita
+    password : banana

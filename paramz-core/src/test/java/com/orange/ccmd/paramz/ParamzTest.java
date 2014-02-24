@@ -28,7 +28,7 @@ public class ParamzTest {
 	public void shouldOverride() {
 		final Paramz paramz = new Paramz();
 
-		paramz.setLocalConfigurationFile(OVERRIDE_PROPERTIES_PATH);
+		paramz.setNodeLevelConfigurationFile(OVERRIDE_PROPERTIES_PATH);
 		paramz.setDefaultConfigurationFile(BASE_PROPERTIES_PATH);
 
 		assertEquals("http://google.com/API/zoupete", paramz.getConfig().getString(KEY_URL));
@@ -41,7 +41,7 @@ public class ParamzTest {
 		final Paramz paramz = new Paramz();
 
 		paramz.setDefaultConfigurationFile(BASE_PROPERTIES_PATH);
-		paramz.setLocalConfigurationFile(BAD_OVERRIDE_PROPERTIES_PATH);
+		paramz.setNodeLevelConfigurationFile(BAD_OVERRIDE_PROPERTIES_PATH);
 
 		assertEquals("http://google.com/API/zoupete", paramz.getConfig().getString(KEY_URL));
 		assertEquals("juanita", paramz.getConfig().getString(KEY_LOGIN));
@@ -55,10 +55,10 @@ public class ParamzTest {
 
 		assertEquals(0, paramz.getParam(KEY_URL).getPreviousValues().size());
 
-		paramz.setParam(KEY_URL, "value1");
-		paramz.setParam(KEY_URL, "value2");
-		paramz.setParam(KEY_URL, "value1");
-		paramz.setParam(KEY_URL, "value2");
+		paramz.setParamNodeLevel(KEY_URL, "value1");
+		paramz.setParamNodeLevel(KEY_URL, "value2");
+		paramz.setParamNodeLevel(KEY_URL, "value1");
+		paramz.setParamNodeLevel(KEY_URL, "value2");
 
 		assertEquals(3, paramz.getParam(KEY_URL).getPreviousValues().size());
 	}
