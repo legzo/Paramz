@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public class Paramz implements ConfigurationListener {
 	 * @return
 	 */
 	public AbstractHierarchicalFileConfiguration addConfigurationSource(
-			final String configurationFilePath) {
+			final String configurationFilePath, final String alias) {
 		try {
 			final AbstractHierarchicalFileConfiguration config = new PrettyXMLConfiguration(
 					configurationFilePath);
@@ -67,9 +68,9 @@ public class Paramz implements ConfigurationListener {
 			reloadingStrategy.setRefreshDelay(refreshDelay);
 			config.setReloadingStrategy(reloadingStrategy);
 
-			globalConfig.addConfiguration(config);
+			globalConfig.addConfiguration(config, alias);
 
-			initParamzCache();
+			initCache();
 
 			return config;
 		} catch (final ConfigurationException e) {
@@ -79,13 +80,15 @@ public class Paramz implements ConfigurationListener {
 		}
 	}
 
-	public void initParamzCache() {
+	public void initCache() {
 		final Iterator<String> keys = globalConfig.getKeys();
 
 		if (keys != null) {
 			while (keys.hasNext()) {
 				final String key = keys.next();
-				parameters.put(key, new Parameter(key, globalConfig.getString(key)));
+				Parameter parameter = new Parameter(key, globalConfig.getString(key));
+				parameter.setHierarchicalView(getHierarchicalView(key));
+				parameters.put(key, parameter);
 			}
 		}
 	}
@@ -96,37 +99,45 @@ public class Paramz implements ConfigurationListener {
 		return values;
 	}
 
-	public void setParamNodeLevel(final String key, final String value) {
-		setParam(key, value, nodeLevelConfig);
-		parameters.get(key).setValueNodeLevel(value);
-	}
-	public void setParamClusterLevel(final String key, final String value) {
-		setParam(key, value, clusterLevelConfig);
-		parameters.get(key).setValueClusterLevel(value);
+	public void setParamNodeLevel(final String key, final String value)
+			throws ConfigurationException {
+		setParam(key, value, nodeLevelConfig, nodeLevelConfigurationFile);
 	}
 
+	public void setParamClusterLevel(final String key, final String value)
+			throws ConfigurationException {
+		setParam(key, value, clusterLevelConfig, clusterLevelConfigurationFile);
+	}
 
 	public void setParam(final String key, final String value,
-			AbstractHierarchicalFileConfiguration configToSaveTo) {
-		if (value != null && !value.equals(getConfig().getString(key))) {
+			AbstractHierarchicalFileConfiguration configToSaveTo,
+			String configurationFile) throws ConfigurationException {
+		if (value != null) {
 			logger.debug("Setting param {}, value={}", key, value);
 
 			if (configToSaveTo != null) {
 				configToSaveTo.setProperty(key, value);
+				saveToFile(configToSaveTo, configurationFile);
 			} else {
 				globalConfig.setProperty(key, value);
 			}
+			Parameter parameter = parameters.get(key);
+
+			Map<String, String> hierarchicalView = getHierarchicalView(key);
+
+			parameter.setValue(globalConfig.getString(key));
+			parameter.setHierarchicalView(hierarchicalView);
 		}
 	}
 
-	public void persistNodeLevel() throws ConfigurationException {
-		saveToFile(nodeLevelConfig, nodeLevelConfigurationFile);
-		undirtyParamsNodeLevel();
-	}
-
-	public void persistClusterLevel() throws ConfigurationException {
-		saveToFile(clusterLevelConfig, clusterLevelConfigurationFile);
-		undirtyParamsClusterLevel();
+	private Map<String, String> getHierarchicalView(final String key) {
+		Map<String, String> hierarchicalView = new LinkedHashMap<String, String>();
+		for (String configName : globalConfig.getConfigurationNameList()) {
+			hierarchicalView.put(configName,
+					globalConfig.getConfiguration(configName)
+							.getString(key));
+		}
+		return hierarchicalView;
 	}
 
 	private void saveToFile(AbstractHierarchicalFileConfiguration configToDump,
@@ -143,18 +154,6 @@ public class Paramz implements ConfigurationListener {
 			String message = "Cannot save config, it does not exist";
 			logger.error(message);
 			throw new ConfigurationException(message);
-		}
-	}
-
-	private void undirtyParamsNodeLevel() {
-		for (final Parameter param : parameters.values()) {
-			param.setDirtyNodeLevel(false);
-		}
-	}
-
-	private void undirtyParamsClusterLevel() {
-		for (final Parameter param : parameters.values()) {
-			param.setDirtyClusterLevel(false);
 		}
 	}
 
@@ -188,9 +187,12 @@ public class Paramz implements ConfigurationListener {
 
 	@PostConstruct
 	public void postConstruct() {
-		nodeLevelConfig = addConfigurationSource(nodeLevelConfigurationFile);
-		clusterLevelConfig = addConfigurationSource(clusterLevelConfigurationFile);
-		defaultConfig = addConfigurationSource(defaultConfigurationFile);
+		nodeLevelConfig = addConfigurationSource(nodeLevelConfigurationFile,
+				"node");
+		clusterLevelConfig = addConfigurationSource(
+				clusterLevelConfigurationFile, "cluster");
+		defaultConfig = addConfigurationSource(defaultConfigurationFile,
+				"default");
 
 		logConfig("     defaultConfig", defaultConfigurationFile, defaultConfig);
 		logConfig("clusterLevelConfig", clusterLevelConfigurationFile,

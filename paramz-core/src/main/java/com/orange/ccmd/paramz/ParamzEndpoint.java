@@ -2,7 +2,7 @@ package com.orange.ccmd.paramz;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -26,23 +26,28 @@ public class ParamzEndpoint {
 		return Response.ok(config.getAll()).build();
 	}
 
-	@POST
+	@PUT
 	@Path("/{key}")
-	@Consumes({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON })
-	public Response setClusterLevel(@PathParam("key") String key,
-			String value) {
-		config.setParamClusterLevel(key, value);
-		return Response.ok().build();
-	}
-
-	@POST
-	@Path("/persist")
-	public Response persistClusterLevel() {
+	@Consumes(MediaType.TEXT_PLAIN)
+	public Response setClusterLevel(@PathParam("key") String key, String value) {
 		try {
-			config.persistClusterLevel();
+			config.setParamClusterLevel(key, value);
 			return Response.ok().build();
 		} catch (ConfigurationException e) {
 			return Response.serverError().build();
 		}
 	}
+
+	@PUT
+	@Path("/{key}/node")
+	@Consumes(MediaType.TEXT_PLAIN)
+	public Response setNodeLevel(@PathParam("key") String key, String value) {
+		try {
+			config.setParamNodeLevel(key, value);
+			return Response.ok().build();
+		} catch (ConfigurationException e) {
+			return Response.serverError().build();
+		}
+	}
+
 }

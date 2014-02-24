@@ -1,8 +1,8 @@
 package com.orange.ccmd.paramz;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class ParamzTest {
 
@@ -48,19 +48,5 @@ public class ParamzTest {
 		assertEquals("banana", paramz.getConfig().getString(KEY_PASSWORD));
 	}
 
-	@Test
-	public void shouldKeepHistoryOfPreviousValues() {
-		final Paramz paramz = new Paramz();
-		paramz.setDefaultConfigurationFile(BASE_PROPERTIES_PATH);
-
-		assertEquals(0, paramz.getParam(KEY_URL).getPreviousValues().size());
-
-		paramz.setParamNodeLevel(KEY_URL, "value1");
-		paramz.setParamNodeLevel(KEY_URL, "value2");
-		paramz.setParamNodeLevel(KEY_URL, "value1");
-		paramz.setParamNodeLevel(KEY_URL, "value2");
-
-		assertEquals(3, paramz.getParam(KEY_URL).getPreviousValues().size());
-	}
 
 }
