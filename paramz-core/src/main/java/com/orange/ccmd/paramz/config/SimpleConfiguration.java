@@ -70,7 +70,7 @@ public abstract class SimpleConfiguration extends
 				parentNode.addChild(childNode);
 			}
 		} else if (obj instanceof Collection) {
-			for (Object child : (Collection) obj) {
+			for (Object child : (Collection<?>) obj) {
 				Node childNode = new Node("item");
 				childNode.setReference(child);
 				loadHierarchy(childNode, child);
